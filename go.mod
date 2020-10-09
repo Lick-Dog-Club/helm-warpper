@@ -12,6 +12,7 @@ require (
 	github.com/spf13/pflag v1.0.5
 	golang.org/x/net v0.0.0-20200324143707-d3edc9973b7e // indirect
 	helm.sh/helm/v3 v3.3.4
+	k8s.io/cli-runtime v0.18.8
 	rsc.io/letsencrypt v0.0.3 // indirect
 	sigs.k8s.io/yaml v1.2.0
 )

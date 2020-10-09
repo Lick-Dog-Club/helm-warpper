@@ -5,6 +5,8 @@ import (
 	"flag"
 	"fmt"
 	"io/ioutil"
+	"log"
+	"net"
 	"net/http"
 	"os"
 	"os/signal"
@@ -24,6 +26,11 @@ type HelmConfig struct {
 	UploadPath string        `yaml:"uploadPath"`
 	HelmRepos  []*repo.Entry `yaml:"helmRepos"`
 }
+
+var (
+	tokenFile  = "/var/run/secrets/kubernetes.io/serviceaccount/token"
+	rootCAFile = "/var/run/secrets/kubernetes.io/serviceaccount/ca.crt"
+)
 
 var (
 	settings          = cli.New()
@@ -47,6 +54,7 @@ func main() {
 	pflag.Parse()
 	defer glog.Flush()
 
+	setInK8s(settings)
 	configBody, err := ioutil.ReadFile(config)
 	if err != nil {
 		glog.Fatalln(err)
@@ -112,4 +120,25 @@ func main() {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 	srv.Shutdown(ctx)
+}
+
+func setInK8s(settings *cli.EnvSettings) {
+	if exists(tokenFile) && exists(rootCAFile) {
+		log.Println("setInK8s")
+		host, port := os.Getenv("KUBERNETES_SERVICE_HOST"), os.Getenv("KUBERNETES_SERVICE_PORT")
+		settings.KubeAPIServer = "https://" + net.JoinHostPort(host, port)
+		token, _ := ioutil.ReadFile(tokenFile)
+		settings.KubeToken = string(token)
+	}
+}
+
+func exists(path string) bool {
+	_, err := os.Stat(path)
+	if err != nil {
+		if os.IsExist(err) {
+			return true
+		}
+		return false
+	}
+	return true
 }
