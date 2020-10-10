@@ -168,6 +168,17 @@ func updateRepositories(c *gin.Context) {
 	respOK(c, nil)
 }
 
+func addRepo(c *gin.Context) {
+	var entry repo.Entry
+	if err := c.ShouldBind(&entry); err != nil {
+		respErr(c, err)
+		return
+	}
+
+	helmConfig.HelmRepos = append(helmConfig.HelmRepos, &entry)
+	updateRepositories(c)
+}
+
 func listRepoCharts(c *gin.Context) {
 	version := c.Query("version")   // chart version
 	versions := c.Query("versions") // if "true", all versions
