@@ -179,9 +179,11 @@ func addRepo(c *gin.Context) {
 	for _, e := range helmConfig.HelmRepos {
 		if !flag && e.Name == entry.Name {
 			flag = true
+			// 如果重复了就更新
+			e.URL = entry.URL
 		}
 	}
-	if !flag {
+	if flag {
 		helmConfig.HelmRepos = append(helmConfig.HelmRepos, &entry)
 	}
 
