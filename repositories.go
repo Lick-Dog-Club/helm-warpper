@@ -183,7 +183,7 @@ func addRepo(c *gin.Context) {
 			e.URL = entry.URL
 		}
 	}
-	if flag {
+	if !flag {
 		helmConfig.HelmRepos = append(helmConfig.HelmRepos, &entry)
 	}
 
