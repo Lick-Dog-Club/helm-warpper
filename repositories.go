@@ -175,7 +175,16 @@ func addRepo(c *gin.Context) {
 		return
 	}
 
-	helmConfig.HelmRepos = append(helmConfig.HelmRepos, &entry)
+	flag := false
+	for _, e := range helmConfig.HelmRepos {
+		if !flag && e.Name == entry.Name {
+			flag = true
+		}
+	}
+	if !flag {
+		helmConfig.HelmRepos = append(helmConfig.HelmRepos, &entry)
+	}
+
 	updateRepositories(c)
 }
 
