@@ -60,6 +60,7 @@ type releaseOptions struct {
 	SubNotes        bool          `json:"sub_notes"`
 	Timeout         time.Duration `json:"timeout"`
 	Values          string        `json:"values"`
+	Version         string        `json:"version"`
 	SetValues       []string      `json:"set"`
 	SetStringValues []string      `json:"set_string"`
 
@@ -299,6 +300,9 @@ func installRelease(c *gin.Context) {
 	client.Timeout = options.Timeout
 	client.CreateNamespace = options.CreateNamespace
 	client.DependencyUpdate = options.DependencyUpdate
+	if options.Version != "" {
+		client.Version = options.Version
+	}
 
 	cp, err := client.ChartPathOptions.LocateChart(chart, settings)
 	if err != nil {
@@ -446,6 +450,9 @@ func upgradeRelease(c *gin.Context) {
 	client.Install = options.Install
 	client.Recreate = options.Recreate
 	client.CleanupOnFail = options.CleanupOnFail
+	if options.Version != "" {
+		client.Version = options.Version
+	}
 
 	cp, err := client.ChartPathOptions.LocateChart(chart, settings)
 	if err != nil {
