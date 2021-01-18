@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"io/ioutil"
+	"log"
 	"os"
 	"path/filepath"
 	"strings"
@@ -139,28 +140,41 @@ func updateChart(c *repo.Entry) error {
 
 func updateRepositories(c *gin.Context) {
 	type errRepo struct {
-		Name string
-		Err  string
+		Name  string
+		Err   string
+		Index int
 	}
 	errRepoList := []errRepo{}
 
 	var wg sync.WaitGroup
-	for _, c := range helmConfig.HelmRepos {
+	for index, c := range helmConfig.HelmRepos {
 		wg.Add(1)
-		go func(c *repo.Entry) {
+		go func(c *repo.Entry, index int) {
 			defer wg.Done()
 			err := updateChart(c)
+			log.Println(c.Name, c.URL)
 			if err != nil {
 				errRepoList = append(errRepoList, errRepo{
-					Name: c.Name,
-					Err:  err.Error(),
+					Index: index,
+					Name:  c.Name,
+					Err:   err.Error(),
 				})
 			}
-		}(c)
+		}(c, index)
 	}
 	wg.Wait()
 
 	if len(errRepoList) > 0 {
+		var newHelmRepos []*repo.Entry
+		for i, helmRepo := range helmConfig.HelmRepos {
+			for _, errRepo := range errRepoList {
+				if errRepo.Index != i {
+					newHelmRepos = append(newHelmRepos, helmRepo)
+				}
+			}
+		}
+		helmConfig.HelmRepos = newHelmRepos
+
 		respErr(c, fmt.Errorf("error list: %v", errRepoList))
 		return
 	}
