@@ -347,13 +347,13 @@ func installRelease(c *gin.Context) {
 		}
 	}
 
-	_, err = client.Run(chartRequested, vals)
+	re, err := client.Run(chartRequested, vals)
 	if err != nil {
 		respErr(c, err)
 		return
 	}
 
-	respOK(c, nil)
+	respOK(c, re)
 }
 
 func uninstallRelease(c *gin.Context) {
@@ -472,13 +472,13 @@ func upgradeRelease(c *gin.Context) {
 		}
 	}
 
-	_, err = client.Run(name, chartRequested, vals)
+	re, err := client.Run(name, chartRequested, vals)
 	if err != nil {
 		respErr(c, err)
 		return
 	}
 
-	respOK(c, nil)
+	respOK(c, re)
 }
 
 func listReleases(c *gin.Context) {
