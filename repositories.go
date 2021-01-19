@@ -200,6 +200,10 @@ func addRepo(c *gin.Context) {
 	if !flag {
 		helmConfig.HelmRepos = append(helmConfig.HelmRepos, &entry)
 	}
+	if err := initRepository(&entry); err != nil {
+		respErr(c, err)
+		return
+	}
 
 	updateRepositories(c)
 }
